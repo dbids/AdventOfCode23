@@ -1,5 +1,3 @@
-import re
-
 # Get numbers from each line in list
 input_strs = []
 with open('day1_input.txt') as f:
