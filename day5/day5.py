@@ -1,11 +1,18 @@
 import re
+from dataclasses import dataclass
+
+# Define seeds datatype
+@dataclass
+class seedData:
+  seed   : int
+  mapped : bool
 
 # Get numbers from line
 def get_nums(line):
   nums = []
   match_obj = re.finditer(r'[0-9]+', line)
   for m in match_obj:
-    nums.append(int(m.group()))
+    nums.append(seedData(int(m.group()), False))
   return nums
 
 # Add to dictionary
@@ -42,26 +49,33 @@ with open('day5_input.txt') as f:
 
       if (sectionNum > 1):
         currDict = add_to_dict(line, currDict)
+        for s in seeds:
+          if (s.mapped == False):
+            seedBefore = s.seed
+            s.seed   = currDict.get(s.seed, s.seed)
+            s.mapped = seedBefore != s.seed
+        # print(f"currDict:{currDict}")
+        # print(f"seeds:{seeds}")
+        currDict = {}
 
       # Detect section title, and calculate new info
       if(re.search("map", line)):
         if (sectionNum > 1):
-          seeds = [currDict.get(s, s) for s in seeds]
           print("\n.......\n" + line[:-2])
           print(f"sectionNum:{sectionNum}")
-          # print(f"currDict:{currDict}")
           print(f"seeds:{seeds}")
+          seeds = [seedData(s.seed, False) for s in seeds]
         sectionNum += 1
-        currDict = {}
 
+    print(f"seeds:{seeds}")
     for s_idx, s in enumerate(seeds):
       if s_idx == 0:
-        least = s
+        least = s.seed
       else:
-        least = s if (s < least) else least
+        least = s.seed if (s.seed < least) else least
       print(f"least:{least}")
 
   except:
     print(Exception)
 
-print(f"least:{least}")
+print(f"final least:{least}")
