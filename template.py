@@ -5,6 +5,6 @@ with open('day4_sample.txt') as f:
         print(line[:-2])
 
       except:
-        print(exception)
+        print(Exception)
 
 print(f"sum:{sum}")

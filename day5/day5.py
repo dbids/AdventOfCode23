@@ -26,92 +26,42 @@ def add_to_dict(line, dict_in):
 
   return dict_in
 
-# Follow dictionaries from seed to location
-def follow_dicts(s, seed2soil, soil2fert, fert2water, water2light, light2temp, temp2humid, humid2loc):
-  s = seed2soil.get(s, s)
-  s = soil2fert.get(s, s)
-  s = fert2water.get(s, s)
-  s = water2light.get(s, s)
-  s = light2temp.get(s, s)
-  s = temp2humid.get(s, s)
-  s = humid2loc.get(s, s)
-  return s
-
-
 # Main loop
 least       = 0
 sectionNum  = 0
 seeds       = []
-seed2soil   = {}
-soil2fert   = {}
-fert2water  = {}
-water2light = {}
-light2temp  = {}
-temp2humid  = {}
-humid2loc   = {}
-# dictList = [{}, {}, {}, {}, {}, {}, {}]
+currDict    = {}
 with open('day5_input.txt') as f:
   try:
     for line in f.readlines():
-      print(line[:-2])
-
       # Get seeds from first line
-      match sectionNum:
-        # seeds
-        case 0:
+      if (sectionNum == 0):
           seeds = get_nums(line)
           sectionNum += 1
           print(f"seeds:{seeds}")
 
-        # seed-to-soil-map
-        case 1:
-          seed2soil = add_to_dict(line, seed2soil)
-          # print(f"seed2soil:{seed2soil}")
+      if (sectionNum > 1):
+        currDict = add_to_dict(line, currDict)
 
-        # soil-to-fertilizer map:
-        case 2:
-          soil2fert = add_to_dict(line, soil2fert)
-          # print(f"soil2fert:{soil2fert}")
+      # Detect section title, and calculate new info
+      if(re.search("map", line)):
+        if (sectionNum > 1):
+          seeds = [currDict.get(s, s) for s in seeds]
+          print("\n.......\n" + line[:-2])
+          print(f"sectionNum:{sectionNum}")
+          # print(f"currDict:{currDict}")
+          print(f"seeds:{seeds}")
+        sectionNum += 1
+        currDict = {}
 
-        # fertilizer-to-water map:
-        case 3:
-          fert2water = add_to_dict(line, fert2water)
-          # print(f"fert2water:{fert2water}")
-
-        # water-to-light map:
-        case 4:
-          water2light = add_to_dict(line, water2light)
-          # print(f"water2light:{water2light}")
-
-        # light-to-temperature map:
-        case 5:
-          light2temp = add_to_dict(line, light2temp)
-          # print(f"light2temp:{light2temp}")
-
-        # temperature-to-humidity map:
-        case 6:
-          temp2humid = add_to_dict(line, temp2humid)
-          # print(f"temp2humid:{temp2humid}")
-
-        # humidity-to-location map:
-        case 7:
-          humid2loc = add_to_dict(line, humid2loc)
-          # print(f"humid2loc:{humid2loc}")
-
-      # Advance sectionNum if section title is detected
-      sectionNum += 1 if(re.search("map", line)) else 0
-      print(f"sectionNum:{sectionNum}")
-
-    # Then map each seed to a location
     for s_idx, s in enumerate(seeds):
-      loc = follow_dicts(s, seed2soil, soil2fert, fert2water, water2light, light2temp, temp2humid, humid2loc)
       if s_idx == 0:
-        least = loc
+        least = s
       else:
-        least = loc if (loc < least) else least
+        least = s if (s < least) else least
       print(f"least:{least}")
 
   except:
-    print(exception)
+    print(Exception)
 
 print(f"least:{least}")
