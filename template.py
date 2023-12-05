@@ -1,10 +1,12 @@
+import traceback
+
 sum = 0
 with open('day4_sample.txt') as f:
+  try:
     for line in f.readlines():
-      try:
-        print(line[:-2])
+      print(line[:-2])
 
-      except:
-        print(Exception)
+  except Exception:
+    traceback.print_exc()
 
 print(f"sum:{sum}")

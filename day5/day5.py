@@ -1,3 +1,4 @@
+import traceback
 import re
 from dataclasses import dataclass
 
@@ -15,29 +16,11 @@ def get_nums(line):
     nums.append(seedData(int(m.group()), False))
   return nums
 
-# Add to dictionary
-def add_to_dict(line, dict_in):
-  # Get numbers from line as list
-  nums = []
-  match_obj = re.finditer(r'[0-9]+', line)
-  for m in match_obj:
-    nums.append(int(m.group()))
-
-  # Check that there are only three numbers then
-  # calculate dictionary values to add and add them
-  if (len(nums) == 3):
-    for i in range(nums[2]):
-      dstNum = nums[0] + i
-      srcNum = nums[1] + i
-      dict_in[srcNum] = dstNum
-
-  return dict_in
 
 # Main loop
 least       = 0
 sectionNum  = 0
 seeds       = []
-currDict    = {}
 with open('day5_input.txt') as f:
   try:
     for line in f.readlines():
@@ -48,15 +31,15 @@ with open('day5_input.txt') as f:
           print(f"seeds:{seeds}")
 
       if (sectionNum > 1):
-        currDict = add_to_dict(line, currDict)
-        for s in seeds:
-          if (s.mapped == False):
-            seedBefore = s.seed
-            s.seed   = currDict.get(s.seed, s.seed)
-            s.mapped = seedBefore != s.seed
-        # print(f"currDict:{currDict}")
-        # print(f"seeds:{seeds}")
-        currDict = {}
+        nums = get_nums(line)
+        if (len(nums) == 3):
+          [dstBase, srcBase, rangeLen] = [i.seed for i in nums]
+          for s in seeds:
+            for r in range(rangeLen):
+              if ((s.mapped == False) and ((srcBase + r) == s.seed)):
+                s.seed   = dstBase + r
+                s.mapped = True
+          print(f"seeds:{seeds}")
 
       # Detect section title, and calculate new info
       if(re.search("map", line)):
@@ -75,7 +58,7 @@ with open('day5_input.txt') as f:
         least = s.seed if (s.seed < least) else least
       print(f"least:{least}")
 
-  except:
-    print(Exception)
+  except Exception:
+    traceback.print_exc()
 
 print(f"final least:{least}")
