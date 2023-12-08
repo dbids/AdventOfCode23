@@ -46,7 +46,7 @@ import importlib
 import sys
 from pathlib import Path
 def mysolve(year, day, data):
-  mod_name = "days_pkg.day_{}.day{}".format(day, day)
+  mod_name = "days_pkg.day{}.day{}".format(day, day)
   mod = importlib.import_module(mod_name)
   dataList = data.split('\n')
   a = mod.part_a(dataList)

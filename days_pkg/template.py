@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # Get either puzzle input from server or sample from txt as list of strings
     if (len(sys.argv) > 1):
       with open('day' + str(day) + '_sample.txt') as f:
-        dataList = [line for line in f.readlines()]
+        dataList = [line.split('\n')[0] for line in f.readlines()]
     else:
       dataList = get_data(day=day, year=2023).split('\n')
     
