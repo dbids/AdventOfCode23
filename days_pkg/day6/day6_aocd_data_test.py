@@ -56,4 +56,4 @@ if __name__ == "__main__":
 
   # Submit via advent-of-code-data
   print(f"ans:{ans}")
-  # submit(ans, part="a", day=6, year=2023)
+  submit(ans, part="a", day=6, year=2023)
