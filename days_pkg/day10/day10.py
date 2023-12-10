@@ -4,6 +4,7 @@ from aocd import get_data
 import sys
 from collections import defaultdict, deque
 from icecream import ic
+from matplotlib.path import Path
 
 # This class represents a directed graph using
 # adjacency list representation
@@ -28,6 +29,7 @@ class Graph:
     ic(self.graph)
 
   # Function to find smallest cycle with BFS from source
+  # Ripped from online but modded for cycle
   def bfs(self, src):
 
    # Initialize the distance array and set the distance of the source vertex to 0
@@ -44,7 +46,6 @@ class Graph:
             if dist[neighbor] == -1:
                 dist[neighbor] = dist[v] + 1
                 q.append(neighbor)
-                print(q)
             elif dist[neighbor] >= dist[v]:
                 # A cycle is found, return its length
                 return dist[v] + dist[neighbor] + 1
@@ -138,7 +139,103 @@ def createGraph(dataList, graphLabels, numVerticies):
                   dataList[l_idx][c_idx+1] == '7'):
                 addEast(g, graphLabels, l_idx, c_idx, len(line))
               sIndex = graphLabels[l_idx][c_idx]
-  return (g, sIndex)
+              sPos = (c_idx, l_idx)
+  return (g, sIndex, sPos)
+
+# Walk cycle on graph and record path
+def walkCycle(sPos, dataList):
+  poly = [sPos]
+  startDir = -1
+  while (startDir <= 3):
+
+    # arbirarily choose a start direction
+    startDir += 1
+    if (startDir == 0 and
+       (dataList[sPos[1]+1][sPos[0]] == '|' or
+        dataList[sPos[1]+1][sPos[0]] == 'L' or
+        dataList[sPos[1]+1][sPos[0]] == 'J')):
+      last_move = [0, 1]
+      position = [sPos[0], sPos[1]+1]
+    elif (startDir == 1 and
+         (dataList[sPos[1]-1][sPos[0]] == '|' or
+          dataList[sPos[1]-1][sPos[0]] == '7' or
+          dataList[sPos[1]-1][sPos[0]] == 'F')):
+      last_move = [0, -1]
+      position = [sPos[0], sPos[1]-1]
+    elif (startDir == 2 and
+         (dataList[sPos[1]][sPos[0]-1] == '-' or
+          dataList[sPos[1]][sPos[0]-1] == 'L' or
+          dataList[sPos[1]][sPos[0]-1] == 'F')):
+      last_move = [-1, 0]
+      position = [sPos[0]-1, sPos[1]]
+    elif (startDir == 3 and
+         (dataList[sPos[1]][sPos[0]+1] == '-' or
+          dataList[sPos[1]][sPos[0]+1] == 'J' or
+          dataList[sPos[1]][sPos[0]+1] == '7')):
+      last_move = [1, 0]
+      position = [sPos[0]+1, sPos[1]]
+    else:
+      continue
+
+    # Walk the graph
+    while dataList[position[1]][position[0]] != 'S':
+      poly.append([*position])
+      tile = dataList[position[1]][position[0]]
+      if tile == "|":
+        if last_move == [0, 1]:
+          position[1] += 1
+        elif last_move == [0, -1]:
+          position[1] -= 1
+      elif tile == "-":
+        if last_move == [1, 0]:
+          position[0] += 1
+        elif last_move == [-1, 0]:
+          position[0] -= 1
+      elif tile == "7":
+        if last_move == [1, 0]:
+          position[1] += 1
+          last_move = [0, 1]
+        elif last_move == [0, -1]:
+          position[0] -= 1
+          last_move = [-1, 0]
+      elif tile == "J":
+        if last_move == [1, 0]:
+          position[1] -= 1
+          last_move = [0, -1]
+        elif last_move == [0, 1]:
+          position[0] -= 1
+          last_move = [-1, 0]
+      elif tile == "L":
+        if last_move == [-1, 0]:
+          position[1] -= 1
+          last_move = [0, -1]
+        elif last_move == [0, 1]:
+          position[0] += 1
+          last_move = [1, 0]
+      elif tile == "F":
+        if last_move == [-1, 0]:
+          position[1] += 1
+          last_move = [0, 1]
+        elif last_move == [0, -1]:
+          position[0] += 1
+          last_move = [1, 0]
+      else:
+        continue
+    break
+  return poly
+
+# Get area from path
+def getPathArea(poly, dataList):
+    p = Path(poly)
+    ans_b = 0
+    for y in range(len(dataList)):
+      for x in range(len(dataList[0])):
+        if [x, y] in poly: # dont count perimiter
+          continue
+        if p.contains_point((x, y)): # within the area
+          ans_b += 1
+    return ans_b
+
 
 # Part A
 def part_a(dataList):
@@ -150,23 +247,42 @@ def part_a(dataList):
   ic(graphLabels)
 
   # Create graph
-  (g, sIndex) = createGraph(dataList=dataList, graphLabels=graphLabels, numVerticies=numVerticies)
+  (g, sIndex, _) = createGraph(dataList=dataList, graphLabels=graphLabels, numVerticies=numVerticies)
   g.print()
   ic(sIndex)
 
   # Find max distance along graph
-  ic.enable()
-  sys.setrecursionlimit(100000)
+  # ic.enable()
   girth = g.girth(sIndex)
   ic(girth)
   if (girth != float('inf')):
-    return int((girth)/2)
+    return int((girth)//2)
 
   return 0
 
 # Part B
 def part_b(dataList):
-  ans_b = 0
+  ic.disable()
+  ic(dataList)
+
+  # Label nodes
+  (graphLabels, numVerticies) = labelNodes(dataList)
+  ic(graphLabels)
+
+  # Create graph
+  (_, _, sPos) = createGraph(dataList=dataList, graphLabels=graphLabels, numVerticies=numVerticies)
+  # ic.enable()
+  ic(sPos)
+
+  # Walk cycle on graph to find verticies
+  poly = walkCycle(sPos, dataList)
+  ic(poly)
+  if(len(poly) == 0):
+    return 0
+
+  # Get area of cycle using matplotlib
+  ans_b = getPathArea(poly, dataList)
+  ic(ans_b)
   return ans_b
 
 # Main loop
@@ -176,17 +292,17 @@ if __name__ == "__main__":
   try:
     # Get either puzzle input from server or sample from txt as list of strings
     if (len(sys.argv) > 1):
-      with open('day' + str(day) + '_sample2.txt') as f:
+      with open('day' + str(day) + '_sample.txt') as f:
         dataList = [line.split('\n')[0] for line in f.readlines()]
     else:
       dataList = get_data(day=day, year=2023).split('\n')
 
     ans_a = part_a(dataList=dataList)
     ic(f"ans_a:{ans_a}")
-    submit(ans_a, part="a", day=day, year=2023)
+    # submit(ans_a, part="a", day=day, year=2023)
 
-    # ans_b = part_b(dataList=dataList)
-    # ic(f"ans_b:{ans_b}")
+    ans_b = part_b(dataList=dataList)
+    ic(f"ans_b:{ans_b}")
     # submit(ans_b, part="b", day=day, year=2023)
 
   except Exception:
