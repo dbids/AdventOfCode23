@@ -1,5 +1,6 @@
 
 .config/
+.vscode/
 __pycache__
 advent_of_code_sample.egg-info/
 build/
