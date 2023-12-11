@@ -34,6 +34,7 @@ def getShortestPath(x1, x2, y1, y2):
 # Part A
 def part_a(dataList):
   ans_a = 0
+  ic.disable()
 
   # Find empty rows and columns
   emptyColList = [True for _ in range(len(dataList[0]))]
@@ -71,6 +72,7 @@ def part_a(dataList):
 # Part B
 def part_b(dataList):
   ans_b = 0
+  ic.disable()
   
   # Find empty rows and columns
   emptyColList = [True for _ in range(len(dataList[0]))]
@@ -118,7 +120,6 @@ if __name__ == "__main__":
     else:
       dataList = get_data(day=day, year=2023).split('\n')
     
-    ic.disable()
     # ans_a = part_a(dataList=dataList)
     # print(f"ans_a:{ans_a}")
     # if (len(sys.argv) <= 1): submit(ans_a, part="a", day=day, year=2023)
