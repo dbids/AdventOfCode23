@@ -2,6 +2,7 @@ import traceback
 from aocd import submit
 from aocd import get_data
 import sys
+from icecream import ic
 
 # Part A
 def part_a(dataList):
@@ -26,11 +27,11 @@ if __name__ == "__main__":
     
     ans_a = part_a(dataList=dataList)
     print(f"ans_a:{ans_a}")
-    # submit(ans_a, part="a", day=day, year=2023)
+    # if (len(sys.argv) <= 1): submit(ans_a, part="a", day=day, year=2023)
 
     # ans_b = part_b(dataList=dataList)
     # print(f"ans_b:{ans_b}")
-    # submit(ans_b, part="b", day=day, year=2023)
+    # if (len(sys.argv) <= 1): submit(ans_b, part="b", day=day, year=2023)
 
   except Exception:
     traceback.print_exc()
