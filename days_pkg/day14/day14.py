@@ -7,6 +7,12 @@ from dataclasses import dataclass
 from enum import Enum
 import numpy as np
 
+class DirectionEnum(Enum):
+  NORTH = 0
+  WEST  = 1
+  SOUTH = 2
+  EAST  = 3
+
 # Sort dem rocks
 def organizeRocks(column):
   # Split column on '#'
@@ -29,6 +35,7 @@ def organizeRocks(column):
 # Part A
 def part_a(dataList):
   ans_a = 0
+  ic.disable()
   
   ic(dataList)
   
@@ -38,10 +45,8 @@ def part_a(dataList):
   ic(dataArray)
   
   # Deal with tilt
-  ic.disable()
   for column_idx, column in enumerate(dataArray):
     dataArray[column_idx] = organizeRocks(column)
-  ic.enable()
   ic(dataArray)
   
   
@@ -55,6 +60,49 @@ def part_a(dataList):
 # Part B
 def part_b(dataList):
   ans_b = 0
+  
+  ic.disable()
+  
+  ic(dataList)
+  
+  # Convert dataList into numpy matrix of chars
+  dataArray = np.array([list(line) for line in dataList], dtype=str)
+  ic(dataArray)
+  
+  # Loop over cycles
+  for cycle in range(1000000000):
+    print("starting cycle: \t{}".format(cycle))
+    for direction in DirectionEnum:
+      ic(direction)
+      # For North Flip compute on the columns
+      if (direction == DirectionEnum.NORTH):
+        for column_idx, column in enumerate(dataArray.transpose()):
+          ic(column)
+          dataArray[:, column_idx] = organizeRocks(column)
+          
+      # For West compute on the rows
+      elif (direction == DirectionEnum.WEST):
+        for row_idx, row in enumerate(dataArray):
+          ic(row)
+          dataArray[row_idx] = organizeRocks(row)
+
+      # For South compute on the flipped columns
+      elif (direction == DirectionEnum.SOUTH):
+        for column_idx, column in enumerate(dataArray.transpose()):
+          ic(column)
+          dataArray[:, column_idx] = np.flipud(organizeRocks(np.flipud(column)))
+          
+      # For east compute on the flipped rows
+      else:
+        for row_idx, row in enumerate(dataArray):
+          ic(row)
+          dataArray[row_idx] = np.flipud(organizeRocks(np.flipud(row)))
+      ic(dataArray)
+    
+  # Get the sum of the weights
+  for column_idx, column in enumerate(dataArray.transpose()):
+    rock_weights = np.where(np.flipud(column) == '$')[0]
+    ans_b += sum(rock_weights) + len(rock_weights)
 
   return ans_b
 
@@ -70,13 +118,13 @@ if __name__ == "__main__":
     else:
       dataList = get_data(day=day, year=2023).split('\n')
 
-    ans_a = part_a(dataList=dataList)
-    print(f"ans_a:{ans_a}")
-    if (len(sys.argv) <= 1): submit(ans_a, part="a", day=day, year=2023)
+    # ans_a = part_a(dataList=dataList)
+    # print(f"ans_a:{ans_a}")
+    # if (len(sys.argv) <= 1): submit(ans_a, part="a", day=day, year=2023)
 
-    # ans_b = part_b(dataList=dataList)
-    # print(f"ans_b:{ans_b}")
-    # if (len(sys.argv) <= 1): submit(ans_b, part="b", day=day, year=2023)
+    ans_b = part_b(dataList=dataList)
+    print(f"ans_b:{ans_b}")
+    if (len(sys.argv) <= 1): submit(ans_b, part="b", day=day, year=2023)
 
   except Exception:
     traceback.print_exc()
