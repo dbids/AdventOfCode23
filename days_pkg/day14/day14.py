@@ -70,8 +70,11 @@ def part_b(dataList):
   ic(dataArray)
   
   # Loop over cycles
+  dataArrayList = []
+  period = 0
+  transient = 0
   for cycle in range(1000000000):
-    print("starting cycle: \t{}".format(cycle))
+    ic("starting cycle: \t{}".format(cycle))
     for direction in DirectionEnum:
       ic(direction)
       # For North Flip compute on the columns
@@ -97,8 +100,27 @@ def part_b(dataList):
         for row_idx, row in enumerate(dataArray):
           ic(row)
           dataArray[row_idx] = np.flipud(organizeRocks(np.flipud(row)))
-      ic(dataArray)
-    
+          
+    # Find when it enters a loop
+    # ic.enable()
+    if (cycle > 0):
+      for dal_idx, dal in enumerate(dataArrayList):
+        if np.array_equal(dal,dataArray):
+          period = cycle - dal_idx
+          transient = dal_idx
+          ic(dal, dataArray, dal_idx)
+          break
+    if period != 0:
+      ic(dataArrayList)
+      ic(period, transient)
+      break
+    dataArrayList.append(np.copy(dataArray))
+    # ic.disable()
+
+  # Calculate the dataArray for the 1,000,000 iter
+  dal_idx = ((1000000000 - 1 - transient) % period) + transient
+  dataArray = dataArrayList[dal_idx]
+
   # Get the sum of the weights
   for column_idx, column in enumerate(dataArray.transpose()):
     rock_weights = np.where(np.flipud(column) == '$')[0]
