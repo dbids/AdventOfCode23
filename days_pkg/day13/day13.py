@@ -30,9 +30,6 @@ def findReflection(dataArray):
 
   return 0
 
-
-
-
 # Part A
 def part_a(dataList):
   ans_a = 0
