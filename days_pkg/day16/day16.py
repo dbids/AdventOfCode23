@@ -99,6 +99,15 @@ def numBeamedTiles(dataArray, visitedArray, dirArray, x, y, dir):
   ic("ending path")
   return visitedArray
 
+# Start the recursion and sum visitedarray
+def startBeaming(dataArray, targetdir, x, y):
+  # Create visted array and begin recurring
+  visitedArray = np.full_like(dataArray, False, dtype=bool)
+  dirArray = [np.full_like(dataArray, False, dtype=bool) for _ in range(4)]
+  visitedArray = numBeamedTiles(dataArray=dataArray, visitedArray=visitedArray, dirArray=dirArray,
+                                x=x, y=y, dir=targetdir)
+
+  return np.count_nonzero(visitedArray)
 
 # Part A
 def part_a(dataList):
@@ -124,7 +133,33 @@ def part_a(dataList):
 
 # Part B
 def part_b(dataList):
-  ans_b = 0
+  sys.setrecursionlimit(100000)
+
+  ic.disable()
+  ic(dataList)
+
+  # Convert pattern into numpy matrix of chars
+  dataArray = np.array([list(line) for line in dataList], dtype=str)
+  ic(dataArray)
+  ic(dataArray.shape)
+
+  ans_b = startBeaming(dataArray, DirectionEnum.RIGHT, 0, 0)
+  for targetdir in DirectionEnum:
+    match targetdir:
+      case DirectionEnum.LEFT:
+        for y in range(dataArray.shape[0]):
+          ans_b = max(ans_b, startBeaming(dataArray, targetdir, dataArray.shape[1]-1, y))
+      case DirectionEnum.RIGHT:
+        for y in range(dataArray.shape[0]):
+          ans_b = max(ans_b, startBeaming(dataArray, targetdir, 0, y))
+      case DirectionEnum.UP:
+        for x in range(dataArray.shape[1]):
+          ans_b = max(ans_b, startBeaming(dataArray, targetdir, x, dataArray.shape[0]-1))  
+      case DirectionEnum.DOWN:
+        for x in range(dataArray.shape[1]):
+          ans_b = max(ans_b, startBeaming(dataArray, targetdir, x, 0))
+
+  # Return the max of the 
   return ans_b
 
 # Main loop
@@ -138,13 +173,13 @@ if __name__ == "__main__":
     else:
       dataList = get_data(day=day, year=2023).split('\n')
 
-    ans_a = part_a(dataList=dataList)
-    print(f"ans_a:{ans_a}")
-    if (len(sys.argv) <= 1): submit(ans_a, part="a", day=day, year=2023)
+    # ans_a = part_a(dataList=dataList)
+    # print(f"ans_a:{ans_a}")
+    # if (len(sys.argv) <= 1): submit(ans_a, part="a", day=day, year=2023)
 
-    # ans_b = part_b(dataList=dataList)
-    # print(f"ans_b:{ans_b}")
-    # if (len(sys.argv) <= 1): submit(ans_b, part="b", day=day, year=2023)
+    ans_b = part_b(dataList=dataList)
+    print(f"ans_b:{ans_b}")
+    if (len(sys.argv) <= 1): submit(ans_b, part="b", day=day, year=2023)
 
   except Exception:
     traceback.print_exc()
